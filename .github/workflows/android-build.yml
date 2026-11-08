@@ -26,19 +26,15 @@ jobs:
       - name: Initialize Capacitor Android
         run: npx cap add android && npx cap sync android
 
-      - name: Apply Custom App Icon
-        run: echo "Icon applied"
-
-      - name: Build APK via Gradle
+      - name: Install Robust Gradle (Bypass Timeout)
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: wrapper
+          gradle-version: '8.0.2'
 
       - name: Compile Android App
         run: |
           cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
