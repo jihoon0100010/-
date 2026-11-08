@@ -1,0 +1,59 @@
+name: Build Android APK with Icon
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Initialize Capacitor Android
+      run: |
+        npx cap add android
+
+    - name: Apply Custom App Icon
+      run: |
+        mkdir -p android/app/src/main/res/drawable
+        if [ -f icon.jpeg ]; then
+          cp icon.jpeg android/app/src/main/res/drawable/ic_launcher.jpeg
+        fi
+
+    - name: Build Android Project & Generate APK
+      run: |
+        cd android
+        ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ismarter-debug-apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+```[cite: 3]
+
+---
+
+### 📌 마지막 필수 작업!
+이 파일까지 저장하셨다면, 아까 보내주셨던 학사모 안경 아이콘 이미지 파일을 저장소 첫 화면(Root)에 업로드하시고 파일 이름을 정확히 **`icon.jpeg`**로 맞춰주시면 모든 파일 준비가 끝납니다[cite: 3].
+
+이후에 깃허브 상단의 **`Actions`** 탭을 누르시면 앱 빌드가 자동으로 시작됩니다[cite: 3].
+
+<FollowUp label="아이콘 파일 업로드나 빌드 확인하는 법을 더 자세히 설명해 드릴까요?" query="아이콘 파일을 깃허브에 업로드하는 방법과 Actions 탭에서 빌드가 잘 되는지 확인하는 법을 더 자세히 설명해 주세요."/>
