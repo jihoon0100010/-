@@ -26,16 +26,14 @@ jobs:
       - name: Initialize Capacitor Android
         run: npx cap add android && npx cap sync android
 
-      - name: Setup Stable Gradle
+      - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.5'
 
-      - name: Compile Android App
+      - name: Build APK Cleanly
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --refresh-dependencies
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
