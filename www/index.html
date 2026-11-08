@@ -4,161 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>아이스마터</title>
-<style>
-:root{--bg:#121212;--card:#1e1e1e;--line:#2c2c2c;--text:#fff;--sub:#b0b0b0;--accent:#ff4757;--ok:#2ed573}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;margin:0;padding:20px;min-height:100vh}
-.screen{display:none;max-width:420px;margin:0 auto}
-.screen.active{display:block}
-.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:14px}
-h2{margin:0 0 6px;font-size:1.3rem}
-p{margin:0 0 14px;color:var(--sub);font-size:.9rem;line-height:1.5}
-input{width:100%;padding:12px;margin-bottom:12px;border:1px solid #333;border-radius:8px;background:#2a2a2a;color:var(--text);font-size:1rem}
-button{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:1rem;cursor:pointer}
-button.ghost{background:#2a2a2a;color:var(--text)}
-button:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
-.tabs{display:flex;gap:6px;margin-bottom:14px}
-.tabs button{padding:10px 0;background:#2a2a2a;color:var(--sub)}
-.tabs button.on{background:var(--accent);color:#fff}
-.flash{min-height:180px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer}
-.flash .w{font-size:2rem;font-weight:800}
-.flash .m{font-size:1.1rem;line-height:1.5}
-.flash .hint{color:var(--sub);font-size:.8rem;margin-top:14px}
-.row{display:flex;gap:8px}
-.opt{margin-bottom:8px;background:#2a2a2a}
-.opt.right{background:var(--ok);color:#111}
-.opt.wrong{background:#6b1f27}
-.keyrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:.95rem}
-.keyrow button{width:auto;padding:6px 12px;font-size:.85rem}
-.score{font-size:2.4rem;font-weight:800;margin:10px 0}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- 라이선스 -->
-<div id="screen-license" class="screen active">
-  <div class="card" style="text-align:center">
-    <h2>아이스마터</h2>
-    <p>발급받은 라이선스 키를 입력하세요.</p>
-    <input id="license-input" type="text" placeholder="라이선스 키 입력" autocomplete="off">
-    <button type="button" onclick="verifyLicense()">입력하고 시작하기</button>
-  </div>
-</div>
-
-<!-- 학습 -->
-<div id="screen-home" class="screen">
-  <div class="tabs">
-    <button id="tab-card" class="on" onclick="showTab('card')">어휘 카드</button>
-    <button id="tab-quiz" onclick="showTab('quiz')">퀴즈</button>
-  </div>
-  <div id="pane"></div>
-  <button class="ghost" onclick="logout()" style="margin-top:6px">로그아웃</button>
-</div>
-
-<!-- 관리자 -->
-<div id="screen-admin" class="screen">
-  <div class="card">
-    <h2 style="color:var(--accent)">관리자 모드</h2>
-    <p>키 발급 및 관리 패널</p>
-    <button onclick="makeKey()">새 키 발급</button>
-  </div>
-  <div class="card">
-    <h2 style="font-size:1.1rem">발급된 키</h2>
-    <div id="keylist"></div>
-  </div>
-  <button class="ghost" onclick="logout()">로그아웃</button>
-</div>
-
-<script>
-var ADMIN_KEY='admin-master-key';
-var WORDS=[
- ['가뭄','오랫동안 비가 오지 않아 물이 부족한 현상'],
- ['다정하다','정이 많고 친절하다'],
- ['끈기','쉽게 포기하지 않고 끝까지 견디는 힘'],
- ['배려','다른 사람을 도와주려고 마음을 씀'],
- ['거들다','남이 하는 일을 도와주다'],
- ['막막하다','앞이 캄캄하여 어찌할 바를 모르다'],
- ['겸손','자신을 낮추고 남을 높이는 태도'],
- ['아름드리','두 팔로 안아야 할 만큼 큰 나무'],
- ['헐레벌떡','숨을 가쁘게 몰아쉬는 모양'],
- ['뿌듯하다','기쁨이 가득 차서 가슴이 벅차다'],
- ['두리번거리다','눈을 크게 뜨고 이리저리 살피다'],
- ['어림짐작','대충 헤아려 짐작함']
-];
-
-function store(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
-function getKeys(){var s=store('ismarter_keys');if(s){try{return JSON.parse(s);}catch(e){}}return ['ismarter-2026'];}
-function setKeys(a){store('ismarter_keys',JSON.stringify(a));}
-function show(id){['license','home','admin'].forEach(function(n){document.getElementById('screen-'+n).classList.toggle('active',n===id);});}
-
-function verifyLicense(){
-  var k=document.getElementById('license-input').value.trim();
-  if(!k){alert('라이선스 키를 입력하세요.');return;}
-  if(k===ADMIN_KEY){store('ismarter_role','admin');enter('admin');}
-  else if(getKeys().indexOf(k)>-1){store('ismarter_role','user');enter('user');}
-  else alert('유효하지 않은 키입니다. 키를 다시 확인하세요.');
-}
-function enter(role){
-  if(role==='admin'){show('admin');renderKeys();}
-  else{show('home');showTab('card');}
-}
-function logout(){store('ismarter_role',null);location.reload();}
-
-/* 관리자 */
-function makeKey(){
-  var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';
-  for(var i=0;i<8;i++){s+=c[Math.floor(Math.random()*c.length)];if(i===3)s+='-';}
-  var a=getKeys();a.push('ISM-'+s);setKeys(a);renderKeys();
-}
-function delKey(i){var a=getKeys();a.splice(i,1);setKeys(a);renderKeys();}
-function renderKeys(){
-  var h='';getKeys().forEach(function(k,i){h+='<div class="keyrow"><span>'+k+'</span><button class="ghost" onclick="delKey('+i+')">삭제</button></div>';});
-  document.getElementById('keylist').innerHTML=h||'<p>발급된 키가 없습니다.</p>';
-}
-
-/* 학습 */
-var cardIdx=0,flipped=false,quiz=null;
-function showTab(t){
-  document.getElementById('tab-card').className=t==='card'?'on':'';
-  document.getElementById('tab-quiz').className=t==='quiz'?'on':'';
-  if(t==='card'){cardIdx=0;flipped=false;renderCard();}else startQuiz();
-}
-function renderCard(){
-  var w=WORDS[cardIdx];
-  document.getElementById('pane').innerHTML=
-   '<div class="card flash" onclick="flip()">'+
-   (flipped?'<div class="m">'+w[1]+'</div>':'<div class="w">'+w[0]+'</div>')+
-   '<div class="hint">'+(cardIdx+1)+' / '+WORDS.length+' · 카드를 누르면 뜻이 보여요</div></div>'+
-   '<div class="row"><button class="ghost" onclick="moveCard(-1)">이전</button><button onclick="moveCard(1)">다음</button></div>';
-}
-function flip(){flipped=!flipped;renderCard();}
-function moveCard(d){cardIdx=(cardIdx+d+WORDS.length)%WORDS.length;flipped=false;renderCard();}
-
-function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-function startQuiz(){quiz={order:shuffle(WORDS).slice(0,8),i:0,score:0,done:false};renderQuiz();}
-function renderQuiz(){
-  var pane=document.getElementById('pane');
-  if(quiz.i>=quiz.order.length){
-    pane.innerHTML='<div class="card" style="text-align:center"><p>퀴즈 결과</p><div class="score">'+quiz.score+' / '+quiz.order.length+'</div><button onclick="startQuiz()">다시 풀기</button></div>';
-    return;
-  }
-  var q=quiz.order[quiz.i];
-  var wrong=shuffle(WORDS.filter(function(w){return w[0]!==q[0];})).slice(0,3);
-  quiz.opts=shuffle(wrong.concat([q]));quiz.answered=false;
-  var h='<div class="card"><p>'+(quiz.i+1)+' / '+quiz.order.length+'번 · 알맞은 낱말은?</p><h2 style="font-size:1.1rem;line-height:1.5">'+q[1]+'</h2></div>';
-  quiz.opts.forEach(function(o,n){h+='<button class="opt" id="o'+n+'" onclick="pick('+n+')">'+o[0]+'</button>';});
-  pane.innerHTML=h;
-}
-function pick(n){
-  if(quiz.answered)return;quiz.answered=true;
-  var q=quiz.order[quiz.i];
-  quiz.opts.forEach(function(o,m){if(o[0]===q[0])document.getElementById('o'+m).classList.add('right');});
-  if(quiz.opts[n][0]===q[0])quiz.score++;else document.getElementById('o'+n).classList.add('wrong');
-  setTimeout(function(){quiz.i++;renderQuiz();},900);
-}
-
-/* 로그인 유지 */
-(function(){var r=store('ismarter_role');if(r)enter(r);})();
-</script>
+<div id="app"></div>
+<script>var DATA={idiom:[],proverb:[],school:[]};</script>
+<script src="data-idiom.js"></script>
+<script src="data-idiom2.js"></script>
+<script src="data-proverb.js"></script>
+<script src="data-proverb2.js"></script>
+<script src="data-school.js"></script>
+<script src="data-school2.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
