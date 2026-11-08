@@ -1,0 +1,14 @@
+{
+  "appId": "com.rookie.ismarter",
+  "appName": "아이스마터",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
+```[cite: 3]
+
+### 이 코드가 하는 일:
+* **`appId` ("com.rookie.ismarter")**: 스마트폰 속에서 이 앱을 구별해 주는 고유한 주소(패키지 이름)입니다[cite: 3].
+* **`appName` ("아이스마터")**: 폰 바탕화면에 설치되었을 때 표시될 **앱 이름**을 "아이스마터"로 지정해 줍니다[cite: 3].
+* **`webDir` ("www")**: 우리가 만든 HTML 학습 화면(`www` 폴더 안의 내용)을 앱의 화면으로 쓰겠다고 연결해 줍니다[cite: 3].
+
+깃허브에 파일을 만드실 때, 파일 이름을 정확히 **`capacitor.config.json`**으로 적고 위의 코드를 그대로 붙여넣으시면 됩니다[cite: 3]!
