@@ -2,6 +2,8 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,16 +26,31 @@ jobs:
         run: npm install
 
       - name: Initialize Capacitor Android
-        run: npx cap add android && npx cap sync android
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      - name: Fix Gradle download settings
+        run: |
+          sed -i 's/networkTimeout=.*/networkTimeout=300000/' android/gradle/wrapper/gradle-wrapper.properties
+          sed -i 's/-all.zip/-bin.zip/' android/gradle/wrapper/gradle-wrapper.properties
+          cat android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Setup Gradle Cache
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build APK Cleanly
+      - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --refresh-dependencies
+          for i in 1 2 3; do
+            ./gradlew assembleDebug --no-daemon && exit 0
+            echo "Build failed (attempt $i), retrying in 15s..."
+            sleep 15
+          done
+          exit 1
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
