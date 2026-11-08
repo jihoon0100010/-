@@ -29,10 +29,14 @@ jobs:
       - name: Apply Custom App Icon
         run: echo "Icon applied"
 
-      - name: Fix Gradle Timeout and Build APK
+      - name: Build APK via Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+
+      - name: Compile Android App
         run: |
           cd android
-          sed -i 's/-all.zip/-bin.zip/g' gradle/wrapper/gradle-wrapper.properties
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
