@@ -47,10 +47,34 @@
         <div class="center-box">
             <h2>아이스마터 라이센스</h2>
             <p style="color: var(--sub-text); margin-bottom: 24px; font-size: 0.95rem;">발급받은 라이센스 키를 입력하세요.</p>
-            <input type="text" id="license-input" placeholder="발급받은 라이선스 키를 입력하세요.">
+<input type="text" id="license-input" placeholder="발급받은 라이선스 키를 입력하세요.">
 <button type="button" onclick="verifyLicense()">입력하고 시작하기</button>
 
 <script>
+  function verifyLicense() {
+    var inputElement = document.getElementById('license-input');
+    if (!inputElement) {
+      alert("입력창을 찾을 수 없습니다.");
+      return;
+    }
+    
+    var enteredKey = inputElement.value.trim();
+
+    if (enteredKey === 'admin-master-key') {
+      alert("관리자 권한으로 로그인되었습니다.");
+      document.getElementById('screen-license').style.display = 'none';
+      document.getElementById('screen-admin').style.display = 'block';
+    } else if (enteredKey === 'ismarter-2026') {
+      alert("아이스마터에 오신 것을 환영합니다!");
+      document.getElementById('screen-license').style.display = 'none';
+      document.getElementById('screen-home').style.display = 'block';
+    } else if (enteredKey === "") {
+      alert("라이선스 키를 입력해주세요.");
+    } else {
+      alert("유효하지 않은 라이선스 키입니다.");
+    }
+  }
+</script><script>
   function verifyLicense() {
     var inputElement = document.getElementById('license-input');
     if (!inputElement) {
